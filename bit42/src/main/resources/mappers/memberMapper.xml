@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="bit.team42.memberMapper">
+
+	<insert id="insert">
+
+		insert into tbl_member(userid, userpw, username,
+		phonenumber,email,gubun) VALUES
+		(#{userid},#{userpw},#{username},#{phonenumber},#{email},#{gubun})
+
+	</insert>
+
+	<delete id="delete">
+
+		delete from tbl_member where userid = #{userid}
+
+	</delete>
+
+	<update id="update">
+
+		update tbl_member set userpw = #{userpw} ,username =
+		#{username},
+		phonenumber = #{phonenumber},email = #{email} where userid
+		= #{userid}
+
+	</update>
+	<update id="updatetoken">
+		update tbl_member set token = #{token} where userid
+		= #{userid}
+	</update>
+	<update id="childcntupdate">
+		update tbl_member set childcount = (select count(*) from tbl_child where userid = #{userid}) 
+		where userid = #{userid}
+	</update>
+
+	<select id="readAll" resultType="bit.team42.domain.MemberVO">
+		select * from tbl_member
+
+	</select>
+
+	<select id="read" resultType="bit.team42.domain.MemberVO">
+		select * from tbl_member where
+		userid = #{userid}
+	</select>
+
+
+	<select id="listPage" resultType="bit.team42.domain.MemberVO">
+ <![CDATA[
+		select *
+		from
+		(select /*+INDEX_DESC(tbl_member pk_userid)*/ rownum
+		rn,userid,username,phonenumber,email,regdate
+		from tbl_member
+		where
+		rownum>0
+		and rownum < (#{page}*10)
+		order by regdate desc
+		)
+		where rn> (#{page}-1)*10
+  ]]>
+	</select>
+
+	<select id="listCriteria" resultType="bit.team42.domain.MemberVO">
+	 <![CDATA[
+		
+		select *
+		from
+		(select /*+INDEX_DESC(tbl_member pk_userid)*/ rownum
+		rn,userid,username,phonenumber,email,regdate
+		from tbl_member
+		where
+		rownum>0
+		and rownum <= (#{page}*#{pageNum})
+		order by regdate desc
+		)
+		where rn> #{pageStart}
+  ]]>
+
+	</select>
+
+	<select id="countPaging" resultType="int">
+	<![CDATA[
+	
+	select count(*) from tbl_member
+	
+  ]]>
+
+	</select>
+
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 't'.toString()">
+				and userid like '%'||#{keyword}||'%'
+			</if>
+			<if test="searchType == 'c'.toString()">
+				and regdate like '%'||#{keyword}||'%'
+			</if>
+			<if test="searchType == 'w'.toString()">
+				and username like '%'||#{keyword}||'%'
+			</if>
+			<if test="searchType == 'tc'.toString()">
+				and ( userid like '%'||#{keyword}||'%' OR regdate like
+				'%'||#{keyword}||'%')
+			</if>
+			<if test="searchType == 'cw'.toString()">
+				and ( regdate like '%'||#{keyword}||'%' OR username like
+				'%'||#{keyword}||'%')
+			</if>
+			<if test="searchType == 'tcw'.toString()">
+				and ( userid like '%'||#{keyword}||'%')
+				OR
+				regdate like
+				'%'||#{keyword}||'%')
+				OR
+				username like '%'||#{keyword}||'%')
+			</if>
+			
+			<if test="sdate!=null" >
+				
+				<![CDATA[
+	
+			 and regdate>=to_date(#{sdate},'yyyy-mm-dd') and regdate<(to_date(#{sdate},'yyyy-mm-dd')+1)
+			 
+  				]]>
+			
+			</if>
+		</if>
+	</sql>
+
+
+	<select id="listSearch" resultType="bit.team42.domain.MemberVO">
+		<![CDATA[
+	
+	select *
+		from
+		(select /*+INDEX_DESC(tbl_member idx_member_regdate)*/ rownum
+		rn,userid,username,phonenumber,email,regdate
+		from tbl_member
+		where rownum>0 and rownum <= (#{page}*#{pageNum}) and regdate<=sysdate 
+		
+	
+  ]]>
+
+		<include refid="search"></include>
+	
+	
+	<![CDATA[
+	order by regdate desc)
+		where rn> #{pageStart}    
+	 
+	  ]]>
+	</select>
+
+
+
+
+
+
+	<select id="listSearchCount" resultType="int">
+<![CDATA[
+	
+select count(rownum) from tbl_member where rownum > 0
+
+	
+  ]]>
+	<include refid="search"></include>	
+	
+	</select>
+	
+	<select id="date" resultType="bit.team42.domain.MemberVO">
+		<![CDATA[
+			select * from tbl_member where regdate>=to_date(#{keyword},'yyyy-mm-dd') and regdate<(to_date(#{keyword},'yyyy-mm-dd')+1)
+	  ]]>
+	</select>
+	
+	
+	
+	<!-- 로그인  -->
+	
+	<select id="login" resultType="bit.team42.domain.MemberVO">
+   
+    select * from tbl_member where userid = #{userid} and userpw = #{userpw}
+    
+    
+    </select>
+    
+    <update id = "keepLogin">
+    update tbl_member set sessionkey = #{sessionid},sessionlimit = #{next} where userid = #{userid}
+    
+    </update>
+    
+    <select id = "checkSession" resultType="bit.team42.domain.MemberVO">
+    select * from tbl_member where sessionkey = #{value} and sessionlimit > sysdate
+    
+    </select>
+	<update id="choice">
+
+update tbl_member set choice = #{cno} where userid = #{userid}
+
+
+
+	</update>
+
+
+
+</mapper>

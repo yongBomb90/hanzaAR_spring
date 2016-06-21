@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bit.team42.qreplyMapper">
+	<insert id="create">
+		insert into tbl_qreply(qrno,qno,replytext,
+		replyer)values(seq_qreply.NEXTVAL,#{qno},#{replytext},#{replyer})
+	</insert>
+
+	<select id="list" resultType="bit.team42.domain.QReplyVO">
+		select * from tbl_qreply where
+		qno=#{qno} order by qrno desc
+	</select>
+
+
+	<update id="update">
+		update TBL_qREPLY set
+		replytext=#{replytext},updatedate=sysdate where
+		qrno=#{qrno}
+	</update>
+
+	<delete id="delete">
+
+		delete from TBL_qREPLY where qrno=#{qrno}
+
+	</delete>
+	
+	<delete id="deleteAll">
+
+		delete from TBL_qREPLY where qno=#{qno}
+
+	</delete>
+
+	<select id="listPage" resultType="bit.team42.domain.QReplyVO">
+	  <![CDATA[
+   select *
+FROM
+  (
+  select /*+INDEX_DESC(tbl_qreply pk_qreply)*/ rownum rn,qrno,replytext,replyer,regdate,updatedate 
+  from tbl_qreply
+  where qno = #{qno}
+  and rownum <= (#{cri.page}*#{cri.pageNum})
+  order by qrno desc
+  )
+where rn > #{cri.pageStart}
+   ]]>
+	</select>
+
+	<select id="count" resultType="int">
+	  <![CDATA[
+   select count(qno)
+   from tbl_qreply
+   where qno=#{qno}  
+   ]]>
+	</select>
+	
+		<select id="getQno" resultType="int">
+	  <![CDATA[
+   select qno from tbl_qreply where qrno=#{qrno}  
+   ]]>
+	</select>
+	
+
+
+</mapper>

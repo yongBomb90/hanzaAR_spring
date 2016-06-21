@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+    <mapper namespace="bit.team42.childmapper">
+    <select id="getNow">
+      select sysdate from dual
+   </select>
+   
+   <insert id="finsert">
+      insert into tbl_child(cno, userid,cname,clevel,age,school,deep,imgpath, s_imgpath)values(seq_child.nextval, #{userid},#{cname},#{clevel},#{age},#{school},#{deep},#{imgpath},#{s_imgpath})
+   </insert>
+    <insert id="insert">
+      insert into tbl_child(cno, userid,cname,clevel,age,school,deep)values(seq_child.nextval, #{userid},#{cname},#{clevel},#{age},#{school},#{deep})
+   </insert>
+     <delete id="delete">
+        delete from tbl_child where cno =#{cno}
+     </delete>
+      <delete id="delUserid">
+        delete from tbl_child where userid =#{userid}
+     </delete>
+     
+     <update id="update">
+        update tbl_child set cname=#{cname},clevel=#{clevel},age=#{age},school=#{school},deep=#{deep} where cno=#{cno}   
+     </update>
+    
+    <select id="readAll" resultType="bit.team42.domain.ChildVO">
+       select * from tbl_child order by cno desc
+    </select>
+    
+    <select id="read" resultType="bit.team42.domain.ChildVO">
+       select cno, userid, cname, clevel, school, deep, imgpath, s_imgpath, age, regdate
+       ,floor(MONTHS_BETWEEN(SYSDATE,TO_CHAR(age,'YY/MM/DD')) / 12)+1 as cage, updatedate
+       from tbl_child where cno=#{cno}
+    </select>
+    
+    <update id="fupdate">
+        update tbl_child 
+        set cname=#{cname},clevel=#{clevel},age=#{age},school=#{school},deep=#{deep},imgpath=#{imgpath}, s_imgpath=#{s_imgpath}
+        where cno=#{cno}   
+     </update>
+    
+
+   <select id="listPage" resultType="bit.team42.domain.ChildVO">
+ <![CDATA[
+      select *
+      from
+      (select /*+INDEX_DESC(tbl_child pk_userid)*/ rownum
+      rn,cno,cname,age,floor(MONTHS_BETWEEN(SYSDATE,TO_CHAR(age,'YY/MM/DD')) / 12)+1 as cage,school,regdate,imgpath,s_imgpath,clevel,deep,userid
+      from tbl_child
+      where
+      rownum>0
+      and rownum < (#{page}*10)
+      order by cno desc
+      )
+      where rn> (#{page}-1)*10
+  ]]>
+   </select>
+
+   <select id="listCri" resultType="bit.team42.domain.ChildVO">
+    <![CDATA[
+      
+      select *
+      from
+      (select /*+INDEX_DESC(tbl_child pk_userid)*/ rownum
+      rn,cno,cname,age,school,regdate,imgpath,s_imgpath,clevel,deep,userid
+      from tbl_child
+      where
+      rownum>0
+      and rownum <= (#{page}*#{pageNum})
+      order by cno desc
+      )
+      where rn> #{pageStart}
+  ]]>
+   
+   </select>
+   
+
+   <select id="listCount" resultType="int">
+   <![CDATA[
+   
+   select count(*) from tbl_child
+   
+  ]]>
+
+   </select>
+   
+   <sql id="search">
+      <if test="searchType != null">
+         <if test="searchType == 'u'.toString()">
+            and userid like '%'||#{keyword}||'%'
+         </if>
+         <if test="searchType == 'r'.toString()">
+            and regdate like '%'||#{keyword}||'%'
+         </if>
+         <if test="searchType == 'c'.toString()">
+            and cname like '%'||#{keyword}||'%'
+         </if>
+         <if test="searchType == 'ur'.toString()">
+            and ( userid like '%'||#{keyword}||'%' OR regdate like
+            '%'||#{keyword}||'%')
+         </if>
+         <if test="searchType == 'cr'.toString()">
+            and ( regdate like '%'||#{keyword}||'%' OR cname like
+            '%'||#{keyword}||'%')
+         </if>
+         <if test="searchType == 'urc'.toString()">
+            and ( userid like '%'||#{keyword}||'%')
+            OR
+            regdate like
+            '%'||#{keyword}||'%')
+            OR
+            cname like '%'||#{keyword}||'%')
+         </if>
+         
+         <if test="sdate!=null" >
+            
+            <![CDATA[
+   
+          and regdate>=to_date(#{sdate},'yyyy-mm-dd') and regdate<(to_date(#{sdate},'yyyy-mm-dd')+1)
+          
+              ]]>
+         
+         </if>
+      </if>
+   </sql>
+
+
+   <select id="listSearch" resultType="bit.team42.domain.ChildVO">
+      <![CDATA[
+   
+   select *
+      from
+      (select /*+INDEX_DESC(tbl_child idx_child_regdate)*/ rownum
+	   rn,userid,cname,ceil(MONTHS_BETWEEN(SYSDATE,TO_DATE(age,'YY/MM/DD')) / 12) as cage,clevel,deep,imgpath,s_imgpath,school,regdate,cno
+	  from tbl_child 
+      where rownum<= (#{page}*#{pageNum}) and regdate<=sysdate 
+      
+   
+  ]]>
+
+      <include refid="search"></include>
+   
+   
+   <![CDATA[
+   order by cno desc)
+      where rn> #{pageStart}    
+    
+     ]]>
+   </select>
+   
+   <select id="listSearchCount" resultType="int">
+<![CDATA[
+   
+select count(rownum) from tbl_child where rownum > 0
+
+   
+  ]]>
+   <include refid="search"></include>   
+   
+   </select>
+   
+   <select id="date" resultType="bit.team42.domain.ChildVO">
+      <![CDATA[
+         select * from tbl_child where regdate>=to_date(#{keyword},'yyyy-mm-dd') and regdate<(to_date(#{keyword},'yyyy-mm-dd')+1)
+     ]]>
+   </select>
+   
+   
+   <select id="login" resultType="bit.team42.domain.ChildVO">
+   
+    select cno, userid, cname, clevel, school, deep, imgpath, s_imgpath, age, regdate
+       ,floor(MONTHS_BETWEEN(SYSDATE,TO_CHAR(age,'YY/MM/DD')) / 12)+1 as cage, updatedate
+        from tbl_child where userid = #{userid} and cno = #{cno}
+       
+    </select>
+    
+    
+   
+    <select id="userchildlist" resultType="bit.team42.domain.ChildVO">
+  <![CDATA[     
+   select * from(
+   select ROWNUM rn ,floor(MONTHS_BETWEEN(SYSDATE,TO_CHAR(age,'YY/MM/DD')) / 12)+1 as cage, AGE,CLEVEL,CNAME,CNO,DEEP,IMGPATH,REGDATE,S_IMGPATH,SCHOOL,UPDATEDATE,USERID from tbl_child where userid=#{userid} 
+   and ROWNUM <= (#{page}*5)order by cno desc)
+   where rn > ((#{page}-1)*5)
+    ]]>
+    </select>
+   
+
+    <select id="userchildlistcnt" resultType="int">
+    select count(*) from tbl_child where userid=#{userid}
+   </select>
+
+   <select id="useridlist" resultType="bit.team42.domain.ChildVO">
+       select * from tbl_child where userid=#{userid}
+    </select>
+
+    
+    <!-- 나이 구하는 쿼리 -->
+  
+	<select id="childtotalcnt" resultType="bit.team42.domain.HanzaTotaVO">
+   select count(cno) total ,clevel from tbl_child group by clevel order by clevel
+   </select>
+   
+   <select id="allcnt" resultType="int">
+   select count(cno) from tbl_child 
+   </select>
+   
+    </mapper>

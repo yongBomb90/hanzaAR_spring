@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+    <mapper namespace="bit.team42.msgmapper">
+    <insert id="insertfile">
+    insert into tbl_msg(mno,userid, cno,content,markerid,filetype,filename,savename) VALUES (seq_mno.nextval,#{userid},#{cno},#{content},#{markerid},#{filetype},#{filename},#{savename})
+    </insert>
+   
+    <select id="selectbycno" resultType="bit.team42.domain.MsgVO">
+     		<![CDATA[
+      select * from(
+	select /*+INDEX_DESC(tbl_msg idx_msg_regdate)*/ ROWNUM rn, mno,cno,content,userid,markerid,filetype,regdate,filename,savename 
+	from tbl_msg 
+	where cno = #{cno}
+	and regdate < sysdate
+	and ROWNUM <= (#{page}*10)
+	ORDER BY regdate)
+	where rn > ((#{page}-1)*10)
+  ]]>
+    </select>
+    <select id="selectbyuserid" resultType="bit.team42.domain.MsgVO">
+      select * from tbl_msg where userid = #{userid}
+    </select>
+     <select id="markerlist" resultType="int">
+      select markerid from tbl_msg where cno = #{cno}
+    </select>
+    <select id="selectbymno" resultType="bit.team42.domain.MsgVO">
+      select * from tbl_msg where mno = #{mno}
+    </select>
+    <select id="selectbymarker" resultType="bit.team42.domain.MsgVO">
+	select * from tbl_msg where cno = #{cno} and markerid = #{markerid}
+    </select>
+    <select id="selectbycnocnt" resultType="int">
+	select count(*) from tbl_msg where cno = #{cno}
+    </select>
+    <delete id="delete">
+      delete from tbl_msg where mno=#{mno}
+    </delete>
+    <update id="update">
+      update tbl_msg set content = #{content},filetype = #{filetype},filename = #{filename},savename = #{savename} where mno=#{mno}
+    </update>
+    </mapper>
+

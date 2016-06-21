@@ -1,0 +1,16 @@
+
+
+/** {*/
+    /*position: absolute;*/
+    /*margin: 0; padding: 0;*/
+/*}*/
+
+input[type="text"] {
+    border: 1px solid #ddd;
+    text-transform: uppercase;
+}
+
+input[type="submit"] {
+    color: #fff;
+    background: mediumpurple;
+}

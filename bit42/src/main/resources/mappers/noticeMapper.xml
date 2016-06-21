@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bit.team42.noticeMapper">
+
+	<select id="testTime" resultType="string">
+		select sysdate from dual
+	</select>
+	
+	<insert id="insertNotice">
+		insert into tbl_notice(nno, title, content, userid)
+		values(seq_notice.nextval, #{title}, #{content}, #{userid})
+	</insert>
+	
+	<select id="selectOne" resultType="bit.team42.domain.NoticeVO">
+		select * from tbl_notice where nno=#{nno}
+	</select>
+	
+	<select id="listAll" resultType="bit.team42.domain.NoticeVO">
+		select * from tbl_notice order by nno desc
+	</select>
+	
+	<select id="listCount" resultType="int">
+		select count(*) from tbl_notice
+	</select>
+
+	<delete id="deleteNotice">
+		delete from tbl_notice where nno=#{nno}
+	</delete>
+	
+	<update id="updateNotice">
+		update tbl_notice set title=#{title}, content=#{content} where nno=#{nno}
+	</update>
+	
+	<select id="listPage" resultType="bit.team42.domain.NoticeVO">
+	
+	  <![CDATA[
+   select *
+	 FROM
+  (
+  	select /*+INDEX_DESC(tbl_notice pk_notice)*/ rownum rn,nno,title,content,userid,regdate from tbl_notice
+  	where nno>0
+  	and rownum <= (#{page}*10)
+  )
+	where rn > (#{page}-1)*10
+   ]]>
+	</select>
+	
+	<select id="listCriteria" resultType="bit.team42.domain.NoticeVO">
+	
+	  <![CDATA[
+   select *
+	FROM
+	  (
+	  select /*+INDEX_DESC(tbl_notice pk_notice)*/ rownum rn,nno,title,content,userid,regdate from tbl_notice
+	  where nno>0
+	  and rownum <= (#{page}*#{pageNum})
+	  )
+	where rn > #{pageStart}
+   ]]>
+	</select>
+	
+	
+	<select id="countPaging" resultType="int">
+	  <![CDATA[
+   select count(nno)
+   from tbl_notice
+   where nno>0
+   ]]>
+	</select>
+
+
+</mapper>

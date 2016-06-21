@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bit.team42.markerMapper">
+
+	<insert id="insertMarker">
+		insert into tbl_marker(markerid, markerpath) values(seq_marker.nextval,#{markerpath} )
+	</insert>
+
+
+	<update id="updateMarker">
+		update tbl_marker set markerpath = #{markerpath} where markerid = #{markerid}
+	</update>
+	
+	<delete id="deleteMarker">
+	 	delete from tbl_marker where markerid = #{markerid}
+	</delete>
+
+	<select id="readAllMarker" resultType="bit.team42.domain.MarkerVO">
+		select * from tbl_marker where markerid > 0 order by markerid desc
+	</select>
+	
+	<select id="readOneMarker" resultType="bit.team42.domain.MarkerVO">
+		select * from tbl_marker where markerid=#{markerid}
+	</select>
+	
+	<select id="listPage" resultType="bit.team42.domain.MarkerVO">
+	
+	  <![CDATA[
+   select *
+	 FROM
+  (
+  	select /*+INDEX_DESC(tbl_marker pk_marker)*/ rownum rn,markerid,markerpath from tbl_marker
+  	where markerid>0
+  	and rownum <= (#{page}*10)
+  )
+	where rn > (#{page}-1)*10
+   ]]>
+	</select>
+	
+	<select id="listCriteria" resultType="bit.team42.domain.MarkerVO">
+	
+	  <![CDATA[
+   select *
+FROM
+  (
+  select /*+INDEX_DESC(tbl_marker pk_marker)*/ rownum rn,markerid,markerpath from tbl_marker
+  where markerid>0
+  and rownum <= (#{page}*#{pageNum})
+  )
+where rn > #{pageStart}
+   ]]>
+	</select>
+	
+	
+	<select id="countPaging" resultType="int">
+	  <![CDATA[
+   select count(markerid)
+   from tbl_marker
+   where markerid>0
+   ]]>
+	</select>
+	
+	
+ 
+</mapper>

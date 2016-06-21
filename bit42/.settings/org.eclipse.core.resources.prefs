@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+encoding//src/main/java/bit/team42/controller/AdminController.java=UTF-8
+encoding//src/main/java/bit/team42/controller/BoardController.java=UTF-8
+encoding//src/main/java/bit/team42/controller/ChildController.java=UTF-8
+encoding//src/main/java/bit/team42/controller/UserChildController.java=UTF-8
+encoding//src/main/java/bit/team42/persistence/ChildDAO.java=UTF-8
+encoding//src/main/java/bit/team42/persistence/MemberDAO.java=UTF-8
+encoding//src/main/java/bit/team42/service/ChildService.java=UTF-8
+encoding//src/main/java/bit/team42/service/MemberService.java=UTF-8
+encoding//src/main/webapp/WEB-INF/views/home2.jsp=UTF-8
+encoding/<project>=UTF-8

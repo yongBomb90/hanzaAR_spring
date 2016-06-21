@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bit.team42.qnaMapper">
+
+	<select id="testTime" resultType="string">
+		select sysdate from dual
+	</select>
+	
+	<insert id="insertQnA">
+		insert into tbl_qna(qno, title, content, userid, secret)
+		values(seq_qna.nextval, #{title}, #{content}, #{userid}, #{secret})
+	</insert>
+	
+	<select id="selectOne" resultType="bit.team42.domain.QnaVO">
+		select * from tbl_qna where qno=#{qno}
+	</select>
+	
+	<select id="listAll" resultType="bit.team42.domain.QnaVO">
+		select * from tbl_qna order by qno desc
+	</select>
+	
+	<select id="listCount" resultType="int">
+		select count(*) from tbl_qna
+	</select>
+
+	<delete id="deleteQnA">
+		delete from tbl_qna where qno=#{qno}
+	</delete>
+	
+	<update id="updateQnA">
+		update tbl_qna set title=#{title}, content=#{content}, secret=#{secret} where qno=#{qno}
+	</update>
+	
+	<select id="listPage" resultType="bit.team42.domain.QnaVO">
+	
+	  <![CDATA[
+   select *
+	 FROM
+  (
+  	select /*+INDEX_DESC(tbl_qna pk_qna)*/ rownum rn,qno,title,content,userid,regdate,secret,replycnt from tbl_qna
+  	where qno>0
+  	and rownum <= (#{page}*10)
+  )
+	where rn > (#{page}-1)*10
+   ]]>
+	</select>
+	
+	<select id="listCriteria" resultType="bit.team42.domain.QnaVO">
+	
+	  <![CDATA[
+   select *
+	FROM
+	  (
+	  select /*+INDEX_DESC(tbl_qna pk_qna)*/ rownum rn,qno,title,content,userid,regdate,secret,replycnt from tbl_qna
+	  where qno>0
+	  and rownum <= (#{page}*#{pageNum})
+	  )
+	where rn > #{pageStart}
+   ]]>
+	</select>
+	
+	
+	<select id="countPaging" resultType="int">
+	  <![CDATA[
+   select count(qno)
+   from tbl_qna
+   where qno>0
+   ]]>
+	</select>
+	
+	
+	<sql id="search">
+		<if test="searchType != null">
+			<if test="searchType == 't'.toString()">
+			  and title like '%'||#{keyword}||'%'			
+			</if>
+			<if test="searchType == 'c'.toString()">
+				and content like '%'||#{keyword}||'%'
+			</if>
+			<if test="searchType == 'w'.toString()">
+				and userid like '%'||#{keyword}||'%'
+			</if>
+			<if test="searchType == 'tc'.toString()">
+				and ( title like '%'||#{keyword}||'%' OR content like
+				'%'||#{keyword}||'%')
+			</if>
+			<if test="searchType == 'cw'.toString()">
+				and ( content like '%'||#{keyword}||'%' 
+				OR 
+				userid like '%'||#{keyword}||'%')
+			</if>
+			<if test="searchType == 'tcw'.toString()">
+				and ( content like '%'||#{keyword}||'%' 
+				OR 
+				title like '%'||#{keyword}||'%'
+				OR
+				userid like '%'||#{keyword}||'%')
+			</if>
+		</if>
+	</sql>
+
+
+	<select id="listSearch" resultType="bit.team42.domain.QnaVO">
+<![CDATA[  
+	   select *
+	FROM
+	  (
+	  select /*+INDEX_DESC(tbl_qna pk_qna)*/ rownum rn,qno,title,content,userid,regdate,secret,replycnt from tbl_qna 
+	  where qno>0
+	]]>
+	
+	<include refid="search"></include>
+	  
+	<![CDATA[    
+	  and rownum <= (#{page}*#{pageNum})
+	  )
+	where rn > #{pageStart}
+	]]>
+		</select>
+	
+		<select id="listSearchCount" resultType="int">
+	<![CDATA[  
+	  select count(qno) 
+	  from tbl_qna 
+	  where qno > 0 
+	]]>
+			
+		<include refid="search"></include>
+
+	</select>
+	
+	<update id="updateReplyCnt">	
+		update tbl_qna set replycnt = replycnt + #{amount} where qno=#{qno}
+	</update>
+
+
+
+</mapper>

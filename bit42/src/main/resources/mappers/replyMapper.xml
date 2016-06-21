@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+    <mapper namespace="bit.team42.replyMapper">
+    
+    <insert id="replyInsert">
+  		insert into tbl_reply(rno, bno, content, userid )values (seq_reply.nextval, #{bno} ,#{content}, #{userid})
+    </insert>
+    
+    <select id="replySelectOne" resultType="bit.team42.domain.ReplyVO">
+    	select * from tbl_reply where bno=#{bno} order by rno desc
+    </select>
+    
+    <delete id="replyDelete">
+    	delete from tbl_reply where rno= #{rno}
+    </delete>
+    
+    <update id="replyupdate">
+    	update tbl_reply set content = #{content} where rno = #{rno}
+    </update>
+    
+    <select id="replyCount" resultType="int">
+    	select count(*) from tbl_reply where bno= #{bno}
+    </select>
+    
+    <delete id="deleteBaord">
+    	delete from tbl_reply where bno=#{bno}
+    </delete>
+    
+    </mapper>

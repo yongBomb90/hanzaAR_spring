@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+    <mapper namespace="bit.team42.visitMapper">
+    
+    <insert id="setVisitTotalCount">
+      INSERT INTO TBL_VISIT (visitcount,userid) VALUES (sysdate,#{userid})
+    </insert>
+    
+    <select id="getVisitTotalCount" resultType="int">
+      select count(*) from TBL_VISIT
+    </select>
+    
+      <select id="getVisitToday" resultType="bit.team42.domain.VisitVO">
+      select userid from TBL_VISIT where substr(to_char(visitcount), 1, 9) = to_date(sysdate, 'yy/MM/dd')
+    </select>
+    
+    <select id="getVisitTodayCount" resultType="int">
+      select count(*) from TBL_VISIT where substr(to_char(visitcount), 1, 9) = to_date(sysdate, 'yy/MM/dd')
+    </select>
+    
+    <select id="memberTotalCount" resultType="int">
+    select count(*) from TBL_MEMBER
+    </select>
+    
+    <select id="childTotalCount" resultType="int">
+    select count(*) from tbl_child
+    </select>
+    
+    <select id="markerTotalCount" resultType="int">
+    select count(*) from TBL_MARKER
+    </select>
+    
+    <select id="hanzaTotalCount" resultType="int">
+    select count(*) from TBL_HANZA4
+    </select>
+    
+    <select id = "memberPage" resultType="bit.team42.domain.VisitVO">
+     <![CDATA[
+    	select *
+		from
+		(select  /*+INDEX_DESC(tbl_visit IDX_VISIT_COUNT)*/ rownum
+		rn,userid,visitcount
+		from tbl_visit
+		where substr(to_char(visitcount), 1, 9) = to_date(sysdate, 'yy/MM/dd') and
+		rownum >0
+		and rownum <= (#{page}*#{pageNum}) and visitcount <=sysdate
+		order by visitcount desc
+		)
+		where rn> #{pageStart}
+    
+    ]]>
+    </select>
+    
+    
+    </mapper>

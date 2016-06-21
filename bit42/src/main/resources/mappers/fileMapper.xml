@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+    <mapper namespace="org.team.fileMapper">
+    
+    <insert id="insertFile">
+       insert into tbl_attach(fno, bno, filename, filepath, thumpath) values(seq_attach.nextval, #{bno}, #{filename}, #{filepath}, #{thumpath} )
+    </insert>
+    
+       
+   <select id="selectOne" resultType="bit.team42.domain.FileVO">
+      select * from tbl_attach where bno = #{bno} order by regdate
+   </select>
+   
+   <update id="updateFile">
+      update tbl_attach set FILENAME=#{filename}, FILEPATH=#{filepath}, thumpath=#{thumpath} where bno=#{bno}
+   </update>
+   
+   <delete id="deleteFile">
+      delete from tbl_attach where bno=#{bno}
+   </delete>
+   
+   <delete id="deleteBno">
+      delete from tbl_attach where bno=#{bno}
+      
+   </delete>
+   
+    </mapper>
+

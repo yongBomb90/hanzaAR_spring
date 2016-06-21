@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    
+    <mapper namespace="bit.team42.goodcountmapper">
+    
+    <select id="selectCount" resultType="bit.team42.domain.GoodCountVO">
+       select * from tbl_goodcount where bno = #{bno}
+    </select>
+    
+    <insert id="insertCount">
+       insert into tbl_goodcount(gcno, bno) values(seq_goodcount.nextval, seq_bno.currval)
+    </insert>
+    
+    <update id="updateCount">
+       update tbl_goodcount set count = #{count} where bno=#{bno}
+    </update>
+    
+    <delete id="deleteCount">
+       delete from tbl_goodcount where bno=#{bno}
+    </delete>
+    
+    </mapper>

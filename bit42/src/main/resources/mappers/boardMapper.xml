@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bit.team42.boardMapper">
+
+   <select id="testTime" resultType="string">
+      select sysdate from dual
+   </select>
+   
+   <select id="selectOne" resultType="bit.team42.domain.BoardVO">
+      select * from tbl_board where bno=#{bno}
+   </select>
+   
+   <select id="listAll" resultType="bit.team42.domain.BoardVO">
+      select * from tbl_board order by gno desc, ord asc
+   </select>
+   
+   <select id="listCount" resultType="int">
+      select count(*) from tbl_board
+   </select>
+
+   <insert id="insertBoard">
+      insert into tbl_board(bno, gno, title, content,userid)
+      values(seq_bno.nextval, seq_bno.currval ,#{title}, #{content}, #{userid})
+   </insert>
+   
+   <select id="replySelectOne" resultType="bit.team42.domain.BoardVO">
+       select * from tbl_board where bno = #{bno}
+    </select>
+   
+   <insert id="replyInsertBoard">
+       insert into tbl_board(bno,gno,pno,ord, depth,title, content, userid)values (
+      seq_bno.NEXTVAL,#{gno},#{pno},
+      #{ord}+(select count(*)+1 from tbl_board start with pno=#{pno} connect by prior bno=pno),#{depth}
+      ,#{title}, #{content}, #{userid})
+    </insert>
+    
+    <update id="replyUpdateBoard">
+       UPDATE tbl_board SET ord = ord+1 
+       where gno = #{gno} and 
+       ord >=(#{ord}+(select count(*)+1 from tbl_board start with pno=#{pno} connect by prior bno=pno))
+    </update>
+   
+   <delete id="replyDeleteBoard">
+      delete from tbl_board where gno= #{gno}
+   </delete>
+   
+   <delete id="deleteBoard">
+      delete from tbl_board where bno=#{bno}
+   </delete>
+   
+   <update id="updateBoard">
+      update tbl_board set title=#{title}, content=#{content} where bno=#{bno}
+   </update>
+   
+   <update id="updateCount">
+      update tbl_board set cnt=cnt+1 where bno=#{bno}
+   </update>
+   
+   <update id="updateReplycnt">
+      update tbl_board set replycnt= (select count(*) from tbl_reply where bno = #{bno} ) where bno = #{bno}
+
+   </update>
+   
+   
+   <insert id="uploadFile">
+      insert into tbl_attach(fullname, bno) values(#{fullname}, seq_bno.currval)
+   </insert>
+   
+   <select id="maxbno" resultType="int">
+      select max(bno) from tbl_board 
+   </select>
+   
+   <select id="useridmaxbno" resultType="int">
+      select max(bno) from tbl_board where userid = #{userid}
+   </select>
+   
+   <select id="listPage" resultType="bit.team42.domain.BoardVO">
+   
+   <![CDATA[
+      select * from 
+      (
+        select /*+INDEX_DESC(tbl_board pk_bno)*/ ROWNUM rn, bno, title, userid
+        from tbl_board
+        where bno > 0 and ROWNUM <= (#{page}*10)
+      )
+      where rn > (#{page}-1)*10)
+   ]]>
+      
+   </select>
+   
+   <select id="listCri" resultType="bit.team42.domain.BoardVO">
+   
+   <![CDATA[
+      select * from 
+      (
+        select /*+INDEX_DESC(tbl_board pk_bno)*/ ROWNUM rn, bno, pno, gno, ord, depth, title, userid,cnt,replycnt
+        from tbl_board
+        where bno>0
+        and ROWNUM <=(#{page}*#{pageNum})
+        order by gno desc, ord asc
+      )
+      where rn > (#{page}-1)*#{pageNum}
+   ]]>
+      
+   </select>
+   
+   
+   
+   
+   <select id="listSearch" resultType="bit.team42.domain.BoardVO">
+   
+      <![CDATA[
+         select * from 
+         (
+           select /*+INDEX_DESC(tbl_board pk_bno)*/ ROWNUM rn, bno, pno, gno, ord, depth, title, userid,cnt,replycnt
+           from tbl_board
+           where bno>0
+         
+      ]]>
+      
+      <include refid="search"></include>
+      
+      <![CDATA[
+         and ROWNUM <=(#{page}*#{pageNum})
+           order by gno desc, ord asc
+           )
+         where rn > (#{page}-1)*#{pageNum}
+      ]]>
+      
+   
+   </select>
+   
+   
+   
+   <select id="listSearchCount" resultType="int">
+   <![CDATA[
+      select count(bno) from tbl_board where bno>0
+   ]]>
+         <include refid="search"></include>
+   
+      
+   </select>
+
+      <sql id="search">
+      <if test="searchType != null">
+         <if test="searchType == 't'.toString()">
+           and title like '%'||#{keyword}||'%'         
+         </if>
+         <if test="searchType == 'c'.toString()">
+            and content like '%'||#{keyword}||'%'
+         </if>
+         <if test="searchType == 'w'.toString()">
+            and userid like '%'||#{keyword}||'%'
+         </if>
+         <if test="searchType == 'tc'.toString()">
+            and ( title like '%'||#{keyword}||'%' OR content like
+            '%'||#{keyword}||'%')
+         </if>
+         <if test="searchType == 'cw'.toString()">
+            and ( content like '%'||#{keyword}||'%' OR userid like
+            '%'||#{keyword}||'%')
+         </if>
+         <if test="searchType == 'tcw'.toString()">
+            and ( title like '%'||#{keyword}||'%')
+            OR
+            content like '%'||#{keyword}||'%')
+            OR
+            userid like '%'||#{keyword}||'%')
+         </if>
+      </if>
+   </sql>
+
+
+   
+   
+   
+
+
+</mapper>

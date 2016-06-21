@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="bit.team42.hanzaMapper">
+
+   <select id="testTime" resultType="string">
+      select sysdate from dual
+   </select>
+   
+   <select id="SelByHanza" resultType="bit.team42.domain.HanzaVO">
+      select * from tbl_hanza4 where hanza=#{hanza}
+   </select>
+   
+   <select id="Gradecnt" resultType="int">
+   select count(*) from tbl_hanza4 where grade=#{grade}
+   </select>
+   
+   <select id="randomsel" resultType="bit.team42.domain.HanzaVO">
+   select * from tbl_hanza4 where markerid=#{markerid}
+   </select>
+   
+   <select id="hanzatotalcnt" resultType="bit.team42.domain.HanzaTotaVO">
+   select count(hanza) total ,grade from tbl_hanza4 group by GRADE order by GRADE
+   </select>
+   
+   
+   <select id="totalcnt" resultType="int">
+   select count(*) from tbl_hanza4 
+   </select>
+   
+   <select id="SelByGrade" resultType="bit.team42.domain.HanzaVO">
+    <![CDATA[
+     SELECT * FROM(
+     select /*+INDEX_ASC(tbl_hanza4 idx_hanza4_writecount)*/ ROWNUM rn, GRADE,HANZA,MEAN,WRITECOUNT,MARKERID 
+     from tbl_hanza4 
+     where grade=#{grade}and WRITECOUNT >0 
+     and ROWNUM <=(#{page}*10)
+     order by WRITECOUNT)
+     where rn > ((#{page}-1)*10)
+      ]]>
+   </select>
+   <select id="Gradetotal" resultType="int">
+   select count(*) from tbl_hanza4 where grade=#{grade}
+   </select>
+   <select id="SelByMarker" resultType="bit.team42.domain.HanzaVO">
+      select * from tbl_hanza4 where markerid=#{markerid} and grade=#{grade}
+   </select>
+   
+   <select id="SelByWritecount" resultType="bit.team42.domain.HanzaVO">
+    <![CDATA[
+       SELECT * FROM(
+        select /*+INDEX_ASC(tbl_hanza4 idx_hanza4_mean)*/ ROWNUM rn, GRADE,HANZA,MEAN,WRITECOUNT,MARKERID 
+        from tbl_hanza4 
+        where WRITECOUNT=#{writecount}
+        and ROWNUM <=(#{page}*10) and mean > ' ' 
+        order by mean)
+        where rn > ((#{page}-1)*10)
+      ]]>
+   </select>
+   <select id="Writecounttotal" resultType="int">
+   select count(*) from tbl_hanza4 where writecount=#{writecount}
+   </select>
+   
+   <insert id="insert">
+   insert into tbl_hanza4(markerid,grade,hanza,mean,writecount) 
+    values(#{markerid},#{grade},#{hanza},#{mean},#{writecount})
+   </insert>
+   
+   <delete id="delete">
+   delete from tbl_hanza4 where hanza=#{hanza}
+   </delete>
+   
+   <update id="update">
+   update tbl_hanza4 set markerid=#{markerid}, grade=#{grade},mean=#{mean},writecount=#{writecount} where hanza=#{hanza}
+   </update>
+
+   
+   
+   
+   <sql id="search">
+      <if test="type != null">
+         <if test="type == 'hanza'">
+           and hanza like '%'||#{keyword}||'%'
+         </if>
+         <if test="type == 'mean'">
+            and mean like '%'||#{keyword}||'%'
+         </if>
+         <if test="type == 'writecount'">
+            and WRITECOUNT = #{writecount}
+         </if>
+         <if test="type == 'grade'">
+             and grade = #{grade}
+         </if>
+         <if test="type == 'markerid'">
+            and markerid = #{markerid}
+         </if>
+        </if>
+       
+        
+   </sql>
+   <select id="searchlist" resultType="bit.team42.domain.HanzaVO">
+   <![CDATA[
+   SELECT  * from(
+   SELECT  ROWNUM rn, GRADE,HANZA,MEAN,WRITECOUNT,MARKERID FROM TBL_HANZA4 
+   where 1=1
+   ]]>
+      <include refid="search"></include>
+   <![CDATA[
+   and ROWNUM <= (#{page}*10))
+   where rn > ((#{page}-1)*10)
+   ]]>
+   </select>
+   
+   <select id="searchlistcnt" resultType="int">
+   select count(*) from TBL_HANZA4  where 1=1
+   <include refid="search"></include>
+   </select>
+   
+   <select id="mobilehanza" resultType="bit.team42.domain.HanzaVO">
+  <![CDATA[     
+   select * from(
+   select ROWNUM rn ,GRADE,HANZA,MEAN,WRITECOUNT,MARKERID from TBL_HANZA4 where grade=#{grade} 
+   and ROWNUM <= (#{page}*#{pagesize})order by WRITECOUNT desc)
+   where rn >= ((#{page}-1)*#{pagesize})
+    ]]>
+    </select>
+   
+   
+   
+   
+
+</mapper>
